@@ -3,16 +3,19 @@
 }
 
 <div class="container">
-  <button style="padding: 15px;" id="getCurrencyData">Hämta data!!</button>
-    <div style="display:none" id="loadingText">Loading...</div>
-    <div>
+    <div class="row">
+        <button style="padding: 15px;" id="getCurrencyData">Hämta data!!</button>
+        <div style="display:none" id="loadingText">Loading...</div>
+    </div>
+    <div class="row">
         <table>
             <thead>
-                <tr>LanguageCode</tr>
-                <tr>Currency</tr>
+                <tr>
+                    <th>LanguageCoade</th>
+                    <th>Currency</th>
+                </tr>
             </thead>
-            <tbody id="currencyDataBody">
-            </tbody>
+            <tbody id="currencyDataBody"></tbody>
         </table>
     </div>
 

@@ -9,16 +9,16 @@
     var updateCurrencyData = function () {
         var currencyData = document.getElementById("currencyDataBody");
         currencyData.innerHTML = "";
-        currencies.forEach(function(i, v){
-            var newLiElement = createNewLiElement(i.LanguageCode, i.Currency);
+        currencies.forEach(function (i, v) {
+            var newLiElement = createTrElement(i.LanguageCode, i.Currency);
             currencyData.appendChild(newLiElement);
         });
         document.getElementById("loadingText").style.display = "none";
     }
-    var createNewLiElement = function(languageCode, currency) {
+    var createTrElement = function (languageCode, currency) {
         var el = document.createElement("tr");
-        var languageSpan = document.createElement("span");
-        var currencySpan = document.createElement("span");
+        var languageSpan = document.createElement("td");
+        var currencySpan = document.createElement("td");
         languageSpan.innerHTML = languageCode;
         currencySpan.innerHTML = currency;
         el.appendChild(languageSpan);
@@ -26,25 +26,26 @@
         return el;
     }
     var loadCurrencyData = function (updateCurrencyData) {
-        document.getElementById("loadingText").style.display = "block";
-        document.getElementById("currencyDataBody").innerHTML = "";
+        showLoading();        
         var xhr = new XMLHttpRequest();
         var url = "/Home/GetCurrencyDataAsync"
         xhr.open('GET', url, true);
         xhr.responseType = 'json';
-        xhr.onload = function (data) {             
-            var status = xhr.status;
-            if (xhr.readyState == 4 && xhr.status == 200){ 
+        xhr.onload = function (data) {
+            if (xhr.readyState == 4 && xhr.status == 200) {
                 currencies = [];
-                currencies = data.target.response;  
-                updateCurrencyData();      
+                currencies = data.target.response;
+                updateCurrencyData();
             } else {
                 alert("error!");
             }
         };
         xhr.send();
     };
-
+    var showLoading = function () {
+        document.getElementById("loadingText").style.display = "inline-block";
+        document.getElementById("currencyDataBody").innerHTML = "";
+    }
     var setCurrencyButton = function () {
         var getCurrencyButton = document.getElementById("getCurrencyData");
         getCurrencyButton.addEventListener("click", function () {
