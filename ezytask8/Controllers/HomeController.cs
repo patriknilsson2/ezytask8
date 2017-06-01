@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ezytask8.Models;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -19,40 +20,41 @@ namespace ezytask8.Controllers
         {
             return View();
         }
-        public async Task<List<ForexData>> CurrencyData()
+        private async Task<ForexDataViewModel> GetCurrencyData()
         {
-            List<ForexData> forexDataList = new List<ForexData>();
+            var forexDataViewModel = new ForexDataViewModel();
+            forexDataViewModel.ForexDataList = new List<ForexData>();
+            forexDataViewModel.ErrorMessage = "";
             await Task.Run(() =>
             {
                 try
                 {
-                    Thread.Sleep(1000);
+                    Thread.Sleep(2000); //simulate slow loading
                     XDocument xmlDoc = XDocument.Load("http://www.forex.se/ratesxml.asp?id=492");
-                    forexDataList = xmlDoc.Descendants("row").
-                                    Where(x => x.Element("swift_code").Value == "EUR" || x.Element("swift_code").Value == "USD")
+                    forexDataViewModel.ForexDataList = xmlDoc.Descendants("row").
+                                    Where(x => x.Element("swift_code").Value == "EUR" ||
+                                               x.Element("swift_code").Value == "USD")
                                    .Select(x => new ForexData
                                    {
-                                       LanguageCode = x.Element("swift_code").Value,
-                                       Currency = x.Element("CurrencyGuide").Value
-                                   })
-                                   .ToList();
+                                       CurrencyCode = x.Element("swift_code").Value,
+                                       Currency = decimal.Parse(x.Element("CurrencyGuide").Value),
+                                       CurrencyName = x.Element("swift_name").Value
+                                   }).ToList();
+                    if (!forexDataViewModel.ForexDataList.Any())
+                    {
+                        forexDataViewModel.ErrorMessage = "No items found";
+                    }
                 }
                 catch (Exception ex)
                 {
-
+                    forexDataViewModel.ErrorMessage = ex.Message;
                 }                
             });
-            return forexDataList;
+            return forexDataViewModel;
         }     
         public async Task<JsonResult> GetCurrencyDataAsync()
         {
-            return Json(await CurrencyData(), JsonRequestBehavior.AllowGet);
-        }
-        public class ForexData
-        {
-            public string LanguageCode { get; set; }
-            public string Currency { get; set; }
-        }
-
+            return Json(await GetCurrencyData(), JsonRequestBehavior.AllowGet);
+        }  
     }
 }

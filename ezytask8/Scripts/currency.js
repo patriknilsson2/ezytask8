@@ -1,53 +1,65 @@
 ﻿var currency = (function () {
-    var currencies = [];
+    var currencyData = [];
     var init = function () {
-        setCurrencyButton();
+        setLoadCurrencyButton();
     }
     var getCurrencyData = function () {
         loadCurrencyData(updateCurrencyData);
     }
     var updateCurrencyData = function () {
-        var currencyData = document.getElementById("currencyDataBody");
-        currencyData.innerHTML = "";
-        currencies.forEach(function (i, v) {
-            var newLiElement = createTrElement(i.LanguageCode, i.Currency);
-            currencyData.appendChild(newLiElement);
-        });
-        document.getElementById("loadingText").style.display = "none";
+        hideLoadingText();
+        var currencyDataBody = document.getElementById("currencyDataBody");
+        currencyDataBody.innerHTML = "";
+        currencyData.forEach(function (i, v) {
+            var newLiElement = createTrElement(i.CurrencyCode, i.Currency, i.CurrencyName);
+            currencyDataBody.appendChild(newLiElement);
+        });        
     }
-    var createTrElement = function (languageCode, currency) {
-        var el = document.createElement("tr");
-        var languageSpan = document.createElement("td");
-        var currencySpan = document.createElement("td");
-        languageSpan.innerHTML = languageCode;
-        currencySpan.innerHTML = currency;
-        el.appendChild(languageSpan);
-        el.appendChild(currencySpan);
-        return el;
+    var createTrElement = function (languageCode, currency, name) {
+        var trElement = document.createElement("tr");
+        trElement.appendChild(createTdElement(languageCode));     
+        trElement.appendChild(createTdElement(currency));     
+        trElement.appendChild(createTdElement(name));     
+        return trElement;
+    }
+    var createTdElement = function (value) {
+        var newTdElement = document.createElement("td");
+        newTdElement.innerHTML = value;
+        return newTdElement;
     }
     var loadCurrencyData = function (updateCurrencyData) {
-        showLoading();        
+        showLoadingText();        
         var xhr = new XMLHttpRequest();
         var url = "/Home/GetCurrencyDataAsync"
         xhr.open('GET', url, true);
         xhr.responseType = 'json';
         xhr.onload = function (data) {
-            if (xhr.readyState == 4 && xhr.status == 200) {
-                currencies = [];
-                currencies = data.target.response;
+            var errorMessage = data.target.response.ErrorMessage;
+            if (xhr.readyState == 4 && xhr.status == 200 && errorMessage.length == 0) {
+                currencyData = [];
+                currencyData = data.target.response.ForexDataList;
                 updateCurrencyData();
             } else {
-                alert("error!");
+                displayErrorMessage(errorMessage)                
             }
         };
         xhr.send();
     };
-    var showLoading = function () {
+    var hideLoadingText = function() {
+        document.getElementById("loadingText").style.display = "none";
+    }
+    var showLoadingText = function () {
         document.getElementById("loadingText").style.display = "inline-block";
         document.getElementById("currencyDataBody").innerHTML = "";
+        document.getElementById("errorMessage").style.display = "none";
     }
-    var setCurrencyButton = function () {
-        var getCurrencyButton = document.getElementById("getCurrencyData");
+    var displayErrorMessage = function (message) {
+        hideLoadingText();
+        document.getElementById("errorMessage").style.display = "inline-block";
+        document.getElementById("errorMessage").innerHTML = message;
+    }    
+    var setLoadCurrencyButton = function () {
+        var getCurrencyButton = document.getElementById("getCurrencyDataButton");
         getCurrencyButton.addEventListener("click", function () {
             currency.getCurrencyData();
         });

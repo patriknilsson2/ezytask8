@@ -3,20 +3,23 @@
 }
 
 <div class="container">
-    <div class="row">
-        <button style="padding: 15px;" id="getCurrencyData">Hämta data!!</button>
-        <div style="display:none" id="loadingText">Loading...</div>
+    <div class="currency-container">
+        <div class="row">
+            <button id="getCurrencyDataButton">Fetch currencydata</button>
+            <div style="display:none" class="messages" id="loadingText">Loading...</div>
+            <div style="display:none" class="messages" id="errorMessage"></div>
+        </div>
+        <div class="row">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>100 sek =</th>
+                        <th>Name</th>
+                    </tr>
+                </thead>
+                <tbody id="currencyDataBody"></tbody>
+            </table>
+        </div>
     </div>
-    <div class="row">
-        <table>
-            <thead>
-                <tr>
-                    <th>LanguageCoade</th>
-                    <th>Currency</th>
-                </tr>
-            </thead>
-            <tbody id="currencyDataBody"></tbody>
-        </table>
-    </div>
-
 </div>
