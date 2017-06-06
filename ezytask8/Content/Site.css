@@ -48,10 +48,14 @@ table td {
 }
 .messages  {
     text-align: center;
+    display: inline-block;
 }
 .currency-container {
     margin-left: auto;
     margin-right: auto;
     margin-top: 20px;
     width: 400px;
+}
+#errorMessage { 
+    color: red;
 }

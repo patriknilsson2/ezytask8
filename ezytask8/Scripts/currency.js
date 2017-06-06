@@ -1,34 +1,13 @@
 ﻿var currency = (function () {
-    var currencyData = [];
-    var init = function () {
-        setLoadCurrencyButton();
+    var priv = {};
+    var pub = {};
+
+    pub.init = function () {
+        priv.loadCurrencyData();
     }
-    var getCurrencyData = function () {
-        loadCurrencyData(updateCurrencyData);
-    }
-    var updateCurrencyData = function () {
-        hideLoadingText();
-        var currencyDataBody = document.getElementById("currencyDataBody");
-        currencyDataBody.innerHTML = "";
-        currencyData.forEach(function (i, v) {
-            var newLiElement = createTrElement(i.CurrencyCode, i.Currency, i.CurrencyName);
-            currencyDataBody.appendChild(newLiElement);
-        });        
-    }
-    var createTrElement = function (languageCode, currency, name) {
-        var trElement = document.createElement("tr");
-        trElement.appendChild(createTdElement(languageCode));     
-        trElement.appendChild(createTdElement(currency));     
-        trElement.appendChild(createTdElement(name));     
-        return trElement;
-    }
-    var createTdElement = function (value) {
-        var newTdElement = document.createElement("td");
-        newTdElement.innerHTML = value;
-        return newTdElement;
-    }
-    var loadCurrencyData = function (updateCurrencyData) {
-        showLoadingText();        
+    priv.loadCurrencyData = function (updateCurrencyData) {
+        priv.viewModel.isLoading(true);
+        priv.viewModel.displayErrorMessage(false);
         var xhr = new XMLHttpRequest();
         var url = "/Home/GetCurrencyDataAsync"
         xhr.open('GET', url, true);
@@ -36,37 +15,53 @@
         xhr.onload = function (data) {
             var errorMessage = data.target.response.ErrorMessage;
             if (xhr.readyState == 4 && xhr.status == 200 && errorMessage.length == 0) {
-                currencyData = [];
-                currencyData = data.target.response.ForexDataList;
-                updateCurrencyData();
+                priv.viewModel.currencyData(data.target.response.ForexDataList);
+                priv.viewModel.isLoading(false);
             } else {
-                displayErrorMessage(errorMessage)                
+                priv.viewModel.errorMessage(errorMessage);
+                priv.viewModel.displayErrorMessage(true);
             }
         };
         xhr.send();
     };
-    var hideLoadingText = function() {
-        document.getElementById("loadingText").style.display = "none";
+    priv.viewModel = {
+        isLoading: ko.observable(false),
+        sortAscending: ko.observable(true),
+        displayErrorMessage: ko.observable(false),
+        errorMessage: ko.observable(""),
+        currencyData: ko.observable([]),
+        loadCurrency: function () {
+            priv.loadCurrencyData()
+        },
+        sort: function (inputParam) {
+            if (inputParam === "name") {
+                if (priv.viewModel.sortAscending() == true) {
+                    priv.viewModel.sortAscending(false);
+                    var currencyData = priv.viewModel.currencyData().sort(function (a, b) {
+                        return (a.CurrencyName < b.CurrencyName) - (a.CurrencyName > b.CurrencyName);
+                    });
+                } 
+                else {
+                    priv.viewModel.sortAscending(true);
+                    var currencyData = priv.viewModel.currencyData().sort(function (a, b) {
+                        return (a.CurrencyName > b.CurrencyName) - (a.CurrencyName < b.CurrencyName);
+                    });
+                }
+
+                priv.viewModel.currencyData(currencyData);
+            }
+        }
     }
-    var showLoadingText = function () {
-        document.getElementById("loadingText").style.display = "inline-block";
-        document.getElementById("currencyDataBody").innerHTML = "";
-        document.getElementById("errorMessage").style.display = "none";
-    }
-    var displayErrorMessage = function (message) {
-        hideLoadingText();
-        document.getElementById("errorMessage").style.display = "inline-block";
-        document.getElementById("errorMessage").innerHTML = message;
-    }    
-    var setLoadCurrencyButton = function () {
-        var getCurrencyButton = document.getElementById("getCurrencyDataButton");
-        getCurrencyButton.addEventListener("click", function () {
-            currency.getCurrencyData();
-        });
-    }
+
     return {
-        init: init,
-        getCurrencyData: getCurrencyData
+        init: pub.init,
+        getCurrencyData: pub.getCurrencyData,
+        viewModel: priv.viewModel
     }
+
 })();
+
+
 currency.init();
+ko.applyBindings(currency.viewModel);
+

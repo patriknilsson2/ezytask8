@@ -5,21 +5,28 @@
 <div class="container">
     <div class="currency-container">
         <div class="row">
-            <button id="getCurrencyDataButton">Fetch currencydata</button>
-            <div style="display:none" class="messages" id="loadingText">Loading...</div>
-            <div style="display:none" class="messages" id="errorMessage"></div>
+            <button id="getCurrencyDataButton" data-bind="click: function() { loadCurrency() }">Reload currencydata</button>
+            <div style="display:none" class="messages" data-bind="visible: isLoading()" id="loadingText">Loading...</div>
+            <div style="display:none" class="messages" data-bind="visible: displayErrorMessage(), text: errorMessage" id="errorMessage"></div>
         </div>
         <div class="row">
             <table>
                 <thead>
                     <tr>
-                        <th>Code</th>
-                        <th>100 sek =</th>
-                        <th>Name</th>
+                        <th data-bind="click: function() { sort('code') }">Code</th>                        
+                        <th data-bind="click: function() { sort('name') }">Name</th>
+                        <th data-bind="click: function() { sort('100sek') }">100 sek =</th>
                     </tr>
                 </thead>
-                <tbody id="currencyDataBody"></tbody>
+                <tbody data-bind="foreach: currencyData, visible: !isLoading()">
+                    <tr>
+                        <td data-bind="text: CurrencyCode"></td>
+                        <td data-bind="text: CurrencyName"></td>
+                        <td data-bind="text: Currency"></td>
+                    </tr>
+                </tbody>
             </table>
         </div>
     </div>
 </div>
+<script src="~/Scripts/knockout-3.4.2.js"></script>
